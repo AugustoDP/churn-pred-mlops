@@ -6,6 +6,7 @@ import xgboost as xgb
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
 from sklearn.model_selection import train_test_split
+from mlflow.models.signature import infer_signature
 
 def load_data(processed_dir):
     X = pd.read_csv(os.path.join(processed_dir, "X.csv"))
@@ -28,7 +29,8 @@ def train_and_log(model, model_name, X_train, X_test, y_train, y_test):
         mlflow.log_metric("auc", auc)
         mlflow.log_text(report, "classification_report.txt")
         input_example = X_train.iloc[[0]]
-        mlflow.sklearn.log_model(model, model_name, input_example=input_example)
+        signature = infer_signature(X_train, y_pred)
+        mlflow.sklearn.log_model(model, model_name, signature=signature, input_example=input_example, registered_model_name=model_name)
         print(f"{model_name} - Accuracy: {accuracy} | AUC: {auc}")
         print(report)
 
