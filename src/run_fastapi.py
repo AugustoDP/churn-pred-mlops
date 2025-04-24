@@ -6,6 +6,7 @@ import os# Load the environment variables from the .env file into the applicatio
 import mlflow
 import requests
 from mlflow.tracking import MlflowClient
+from auxiliary_functions import get_predictions
 
 class churnSample(BaseModel):
     Age: float
@@ -13,31 +14,6 @@ class churnSample(BaseModel):
     Monthly_Spending: float
     Subscription_Length: float
     Support_Interactions: float
-
-def get_predictions(data):
-    print(data.head())
-
-    # Defina as colunas esperadas pelo modelo
-    columns = [
-        "Age", "Gender", "Monthly_Spending", "Subscription_Length", "Support_Interactions", 
-    ]
-    
-    # Crie uma lista de dicionários, onde cada dicionário representa uma instância
-    instances = []
-    for _, row in data.iterrows():
-        instance = {col: row[col] for col in columns}
-        instances.append(instance)
-
-
-    url = "http://127.0.0.1:8000/invocations"
-    headers = {"Content-Type": "application/json"}
-    payload = {"instances": instances}
-    
-    response = requests.post(url, headers=headers, json=payload)
-    predictions = response.json()
-    predictions = predictions.get("predictions")
-    print(predictions)
-    return predictions
 
 app = FastAPI()# Create a class to store the deployed model & use it for prediction
 

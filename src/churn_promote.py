@@ -2,7 +2,7 @@ import mlflow
 from mlflow.tracking import MlflowClient
 
 client = MlflowClient(tracking_uri="sqlite:///mlflow.db")
-list_of_models = ["Random Forest", "XGBoost"]
+list_of_models = ["RandomForestGridSearch", "XGBoost"]
 for model_name in list_of_models:
 
     # Definir os limites de accuracy-score para Staging e Production
