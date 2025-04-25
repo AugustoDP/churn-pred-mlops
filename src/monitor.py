@@ -5,19 +5,20 @@ from evidently.legacy.report import Report
 from evidently.legacy.metric_preset import DataDriftPreset, RegressionPreset, ClassificationPreset
 from sklearn.preprocessing import LabelEncoder
 import os
+import sys
 import json
 from auxiliary_functions import get_predictions, preprocess_data
 
 
-def check_for_drift(drift_score, drift_by_columns):
+def check_for_drift(drift_score, drift_by_columns, dataset_name):
     num_columns_drift = sum(1 for col, values in drift_by_columns.items() if values.get("drift_detected", False))
     if drift_score > 0.5:
         print("Drift detectado no Dataset")
-        #os.system("py train.py new_customer_churn_dataset.csv")
+        os.system(f"start /wait cmd /k py train.py {dataset_name}")
     else:
         if num_columns_drift > 2:
             print(f"Drift detectado em {num_columns_drift} colunas! Treinando novo modelo...")
-            #os.system("py train.py new_customer_churn_dataset.csv")
+            os.system(f"start /wait cmd /k py train.py {dataset_name}")
         else:
             print("Modelo ainda está bom, sem necessidade de re-treinamento.")
             print("Nenhum drift detectado nas colunas e no dataset")
@@ -63,20 +64,28 @@ def evaluate_model(df, y, new_data):
         print(f"Coluns drift: {drift_by_columns}")
         return drift_score, drift_by_columns
 
-def main():
 
+def monitor_data_drift(dataset_name, new_dataset_name):
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     # Primeiro testa o modelo com si mesmo
-    dataset_name = "customer_churn_dataset.csv"
     data_path = os.path.join(project_root, "data", "raw", dataset_name)
     df_examples, y = load_new_data(data_path)
     drift_score, drift_by_columns = evaluate_model(df_examples, y, None)
     # Em seguida testa o modelo com novos dados
-    new_dataset_name = "new_customer_churn_dataset.csv"
     new_data_path = os.path.join(project_root, "data", "raw", new_dataset_name)
     new_data, _ = load_new_data(new_data_path)
     drift_score, drift_by_columns = evaluate_model(df_examples, y, new_data)
-    check_for_drift(drift_score, drift_by_columns)
+    check_for_drift(drift_score, drift_by_columns, new_dataset_name)
+
+def main():
+    if len(sys.argv) > 2:
+        dataset_name = sys.argv[1]
+        new_dataset_name = sys.argv[2]
+        monitor_data_drift(dataset_name, new_dataset_name)
+        
+    else:
+        print("Incorrect calling method. \n")
+        print("Usage: py monitor.py \"old_dataset_used_to_train.csv\" \"new_dataset_to_check.csv\"")
 
 if __name__ == "__main__":
     main()

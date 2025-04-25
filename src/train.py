@@ -10,7 +10,7 @@ from sklearn.metrics import accuracy_score, classification_report, roc_auc_score
 from sklearn.model_selection import train_test_split
 from mlflow.models.signature import infer_signature
 from auxiliary_functions import preprocess_data
-
+from churn_promote import promote_best_model
 mlflow.set_tracking_uri("sqlite:///mlflow.db")
 mlflow.set_experiment("customerchurn_experiment")
 
@@ -169,6 +169,8 @@ def main():
 
     _ = train_random_forest(X, y, dataset_name, mlflow_dataset)
     _ = train_xgboost(X, y, dataset_name, mlflow_dataset)
+
+    promote_best_model()
 
 
 if __name__ == "__main__":
