@@ -6,6 +6,9 @@ import os# Load the environment variables from the .env file into the applicatio
 import mlflow
 import requests
 from mlflow.tracking import MlflowClient
+from auxiliary_functions import get_predictions
+from monitor import monitor_data_drift
+
 
 class churnSample(BaseModel):
     Age: float
@@ -13,31 +16,6 @@ class churnSample(BaseModel):
     Monthly_Spending: float
     Subscription_Length: float
     Support_Interactions: float
-
-def get_predictions(data):
-    print(data.head())
-
-    # Defina as colunas esperadas pelo modelo
-    columns = [
-        "Age", "Gender", "Monthly_Spending", "Subscription_Length", "Support_Interactions", 
-    ]
-    
-    # Crie uma lista de dicionários, onde cada dicionário representa uma instância
-    instances = []
-    for _, row in data.iterrows():
-        instance = {col: row[col] for col in columns}
-        instances.append(instance)
-
-
-    url = "http://127.0.0.1:8000/invocations"
-    headers = {"Content-Type": "application/json"}
-    payload = {"instances": instances}
-    
-    response = requests.post(url, headers=headers, json=payload)
-    predictions = response.json()
-    predictions = predictions.get("predictions")
-    print(predictions)
-    return predictions
 
 app = FastAPI()# Create a class to store the deployed model & use it for prediction
 
@@ -53,6 +31,19 @@ async def create_upload_file(file: UploadFile = File(...)):
         data = pd.read_csv(file.filename)
         os.remove(file.filename)        # Return a JSON object containing the model predictions
         return get_predictions(data)
+    else:
+        # Raise a HTTP 400 Exception, indicating Bad Request 
+        # (you can learn more about HTTP response status codes here)
+        raise HTTPException(status_code=400, detail="Invalid file format. Only CSV Files accepted.")# Check if the environment variables for AWS access are available. 
+    
+
+@app.post("/check_drift")
+async def check_dataset_drift(old_file: UploadFile = File(...), new_file: UploadFile = File(...)):
+    # Handle the file only if it is a CSV
+    if old_file.filename.endswith(".csv") and new_file.filename.endswith(".csv"):
+        # Create a temporary file with the same name as the uploaded 
+        # CSV file to load the data into a pandas Dataframe
+        monitor_data_drift(old_file.filename, new_file.filename)
     else:
         # Raise a HTTP 400 Exception, indicating Bad Request 
         # (you can learn more about HTTP response status codes here)

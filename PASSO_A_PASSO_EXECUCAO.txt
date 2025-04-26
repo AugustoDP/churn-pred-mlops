@@ -1,0 +1,13 @@
+Passo a passo de como rodar o ambiente
+Primeiramente é necessário ter python 3.10
+
+1. Rodar install_venv_and_or_activate.bat, esse bat cria a venv e instala as dependencias e finalmente ativa a venv, caso ja exista, só ativa a venv.
+2. Rodar o primeiro comando (#MLFLOW) em  src/comandos_a_rodar_cmd.txt para levantar server local mlflow
+3. Rodar train.py a partir do venv. Quando terminar pode visualizar os modelos em http://127.0.0.1:5000/#/models
+4. Rodar o segundo comando (#MLFLOW SERVE) em  src/comandos_a_rodar_cmd.txt para servir o modelo desejado em produção.
+5. Rodar em cmd ou terminal de venv do vscode (preferência pessoal) o terceiro comando (#FASTAPI APP) para usar fastAPI
+6. A esse ponto devemos ter 3 portas abertas mlflow 5000, serve 8000 e fastapi 1234, agora é só acessar http://127.0.0.1:1234/docs# e testar as APIs disponíveis.
+7. APIs disponíveis em fastAPI:
+- predict: dado uma sample, devolve resultado de previsão do modelo
+- predict_csv: dado um arquivo csv com várias samples, devolve resultado de previsão do modelo
+- check_drift: dado dois arquivos csv, o antigo onde os modelos foram treinados e um novo, verifica se ocorre data drift e, caso ocorra, retreina o modelo com base nos novos dados.

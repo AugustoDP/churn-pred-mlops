@@ -1,0 +1,14 @@
+COMANDOS A RODAR PARA LEVANTAR SERVIDORES LOCAIS
+#MLFLOW
+mlflow ui --backend-store-uri sqlite:///mlflow.db
+
+#MLFLOW SERVE
+mlflow models serve -m "models:/NOMEDOMODELOREGISTRADO/Production" --env-manager virtualenv --no-conda --port 8000
+
+ex:
+mlflow models serve -m "models:/RandomForestGridSearch/Production" --env-manager virtualenv --no-conda --port 8000
+mlflow models serve -m "models:/XGBoost/Production" --env-manager virtualenv --no-conda --port 8000
+
+
+#FASTAPI APP
+uvicorn run_fastapi:app --port 1234 --reload

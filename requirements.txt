@@ -4,6 +4,6 @@ scikit-learn
 matplotlib
 dvc
 fastapi[all]
-evidently
+evidently==0.6.7
 jupyter
 xgboost
